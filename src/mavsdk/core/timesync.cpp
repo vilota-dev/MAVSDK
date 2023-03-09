@@ -130,7 +130,7 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
 
         } else {
 
-            if (is_converged()) {
+            if (!is_converged()) {
                 // Interpolate with a sigmoid function
                 double progress = (double)_sequence / (double)CONVERGENCE_WINDOW;
                 double p = 1.0 - exp(0.5 * (1.0 - 1.0 / (1.0 - progress)));
