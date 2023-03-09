@@ -44,7 +44,7 @@ private:
     static constexpr uint64_t MAX_CONS_HIGH_RTT = 5;
     static constexpr uint64_t MAX_RTT_SAMPLE_MS = 10;
     static constexpr uint64_t MAX_DEVIATION_SAMPLE_MS = 100;
-    static constexpr uint64_t CONVERGENCE_WINDOW = 100;
+    static constexpr uint64_t CONVERGENCE_WINDOW = 150;
     static constexpr uint32_t MAX_CONSECUTIVE_HIGH_RTT = 5;
     static constexpr uint32_t MAX_CONSECUTIVE_HIGH_DEVIATION = 5;
 

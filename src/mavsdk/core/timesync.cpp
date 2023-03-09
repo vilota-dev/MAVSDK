@@ -95,6 +95,7 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
 
     // Calculate the round trip time (RTT) it took the timesync packet to bounce back to us from
     // remote system
+    assert(now_ns > start_transfer_local_time_ns);
     uint64_t rtt_ns = now_ns - start_transfer_local_time_ns;
 
     uint64_t deviation_ns = std::abs((int64_t)_time_offset - offset_ns);
@@ -130,11 +131,14 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
                 _filter_beta = BETA_GAIN_FINAL;
             }
 
+            add_sample(offset_ns);
+
             // Increment sequence counter after filter update
             _sequence++;
 
-            if (_sequence == 1)
-                LogInfo() << "Time Sync starts, first offset sample = " << offset_ns / 1e6 << " ms";
+            if (!is_converged() && _sequence % 50 == 1)
+                LogInfo() << "Time Sync in progress " << _sequence << "/" << CONVERGENCE_WINDOW 
+                    << ", current offset estimate = " << _time_offset / 1e6 << " ms, current offset sample = " << offset_ns / 1e6 << " ms";
             else if (_sequence == CONVERGENCE_WINDOW)
                 LogInfo() << "Time Sync complete with offset of " << _time_offset / 1e6 << " ms, last offset sample = "
                     << offset_ns / 1e6 << " ms";
@@ -145,8 +149,6 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
             _high_rtt_count = 0;
 
         }
-
-        add_sample(offset_ns);
 
         // Save time offset for other components to use
         // _parent.get_autopilot_time().shift_time_by(std::chrono::nanoseconds(offset_ns));
