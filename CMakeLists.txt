@@ -46,17 +46,16 @@ project(mavsdk_superbuild)
 
 # configure build types and build c-flags
 if( NOT CMAKE_BUILD_TYPE )
-  # Release, RelWithAssert, RelWithEigenNan
-  set( CMAKE_BUILD_TYPE Release) # Choice of Release (ignore assert) and RelWithDebInfo (includes assert)
+  # Release, RelWithAssert
+  set( CMAKE_BUILD_TYPE RelWithAssert) # Choice of Release (ignore assert) and RelWithDebInfo (includes assert)
 endif()
 
 message(WARNING "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
 
-# set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g -DEIGEN_INITIALIZE_MATRICES_BY_NAN")          # cmake default: "-g"
-# set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g -DEIGEN_INITIALIZE_MATRICES_BY_NAN")  # cmake default: "-O2 -g -DNDEBUG"
-# set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")                                      # cmake default: "-O3 -DNDEBUG"
-# set(CMAKE_CXX_FLAGS_RELWITHASSERT "-O3")
-# set(CMAKE_CXX_FLAGS_RELWITHEIGENNAN  "-O3 -DEIGEN_INITIALIZE_MATRICES_BY_NAN")   # enable nan initialisation for eigen
+set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")          # cmake default: "-g"
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g")  # cmake default: "-O2 -g -DNDEBUG"
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")   # cmake default: "-O3 -DNDEBUG"
+set(CMAKE_CXX_FLAGS_RELWITHASSERT "-O3")
 
 
 # Set default installation directory
