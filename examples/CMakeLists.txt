@@ -3,6 +3,9 @@ project(mavsdk_examples)
 
 # This allows to build all examples at once.
 
+set(cmake_config_DIR "/home/$ENV{USER}/git/MAVSDK/build/install/lib/cmake")
+set(MAVSDK_DIR ${cmake_config_DIR}/MAVSDK)
+
 if (WERROR)
     add_compile_options(-Werror)
 endif()
@@ -23,7 +26,7 @@ add_subdirectory(geofence)
 add_subdirectory(gimbal)
 add_subdirectory(gimbal_device_tester)
 add_subdirectory(logfile_download)
-add_subdirectory(manual_control)
+# add_subdirectory(manual_control)
 add_subdirectory(mavshell)
 add_subdirectory(multiple_drones)
 add_subdirectory(offboard)
