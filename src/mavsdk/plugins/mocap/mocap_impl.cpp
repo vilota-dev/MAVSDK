@@ -61,17 +61,17 @@ Mocap::Result MocapImpl::set_odometry(const Mocap::Odometry& odometry)
 Mocap::Result MocapImpl::send_vision_position_estimate(
     const Mocap::VisionPositionEstimate& vision_position_estimate)
 {
-    const uint64_t autopilot_time_usec =
-        (!vision_position_estimate.time_usec) ?
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                _parent->get_autopilot_time().now().time_since_epoch())
-                .count() :
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                _parent->get_autopilot_time()
-                    .time_in(SystemTimePoint(
-                        std::chrono::microseconds(vision_position_estimate.time_usec)))
-                    .time_since_epoch())
-                .count();
+    // const uint64_t autopilot_time_usec =
+    //     (!vision_position_estimate.time_usec) ?
+    //         std::chrono::duration_cast<std::chrono::microseconds>(
+    //             _parent->get_autopilot_time().now().time_since_epoch())
+    //             .count() :
+    //         std::chrono::duration_cast<std::chrono::microseconds>(
+    //             _parent->get_autopilot_time()
+    //                 .time_in(SystemTimePoint(
+    //                     std::chrono::microseconds(vision_position_estimate.time_usec)))
+    //                 .time_since_epoch())
+    //             .count();
 
     std::array<float, 21> covariance{};
 
@@ -95,7 +95,7 @@ Mocap::Result MocapImpl::send_vision_position_estimate(
         _parent->get_own_system_id(),
         _parent->get_own_component_id(),
         &message,
-        autopilot_time_usec,
+        vision_position_estimate.time_usec,
         vision_position_estimate.position_body.x_m,
         vision_position_estimate.position_body.y_m,
         vision_position_estimate.position_body.z_m,
@@ -111,17 +111,17 @@ Mocap::Result MocapImpl::send_vision_position_estimate(
 Mocap::Result
 MocapImpl::send_attitude_position_mocap(const Mocap::AttitudePositionMocap& attitude_position_mocap)
 {
-    const uint64_t autopilot_time_usec =
-        (!attitude_position_mocap.time_usec) ?
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                _parent->get_autopilot_time().now().time_since_epoch())
-                .count() :
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                _parent->get_autopilot_time()
-                    .time_in(SystemTimePoint(
-                        std::chrono::microseconds(attitude_position_mocap.time_usec)))
-                    .time_since_epoch())
-                .count();
+    // const uint64_t autopilot_time_usec =
+    //     (!attitude_position_mocap.time_usec) ?
+    //         std::chrono::duration_cast<std::chrono::microseconds>(
+    //             _parent->get_autopilot_time().now().time_since_epoch())
+    //             .count() :
+    //         std::chrono::duration_cast<std::chrono::microseconds>(
+    //             _parent->get_autopilot_time()
+    //                 .time_in(SystemTimePoint(
+    //                     std::chrono::microseconds(attitude_position_mocap.time_usec)))
+    //                 .time_since_epoch())
+    //             .count();
 
     mavlink_message_t message;
 
@@ -152,7 +152,7 @@ MocapImpl::send_attitude_position_mocap(const Mocap::AttitudePositionMocap& atti
         _parent->get_own_system_id(),
         _parent->get_own_component_id(),
         &message,
-        autopilot_time_usec,
+        attitude_position_mocap.time_usec,
         q.data(),
         attitude_position_mocap.position_body.x_m,
         attitude_position_mocap.position_body.y_m,
@@ -164,16 +164,16 @@ MocapImpl::send_attitude_position_mocap(const Mocap::AttitudePositionMocap& atti
 
 Mocap::Result MocapImpl::send_odometry(const Mocap::Odometry& odometry)
 {
-    const uint64_t autopilot_time_usec =
-        (!odometry.time_usec) ?
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                _parent->get_autopilot_time().now().time_since_epoch())
-                .count() :
-            std::chrono::duration_cast<std::chrono::microseconds>(
-                _parent->get_autopilot_time()
-                    .time_in(SystemTimePoint(std::chrono::microseconds(odometry.time_usec)))
-                    .time_since_epoch())
-                .count();
+    // const uint64_t autopilot_time_usec =
+    //     (!odometry.time_usec) ?
+    //         std::chrono::duration_cast<std::chrono::microseconds>(
+    //             _parent->get_autopilot_time().now().time_since_epoch())
+    //             .count() :
+    //         std::chrono::duration_cast<std::chrono::microseconds>(
+    //             _parent->get_autopilot_time()
+    //                 .time_in(SystemTimePoint(std::chrono::microseconds(odometry.time_usec)))
+    //                 .time_since_epoch())
+    //             .count();
 
     mavlink_message_t message;
 
@@ -218,7 +218,7 @@ Mocap::Result MocapImpl::send_odometry(const Mocap::Odometry& odometry)
         _parent->get_own_system_id(),
         _parent->get_own_component_id(),
         &message,
-        autopilot_time_usec,
+        odometry.time_usec,
         static_cast<uint8_t>(odometry.frame_id),
         static_cast<uint8_t>(MAV_FRAME_BODY_FRD),
         odometry.position_body.x_m,

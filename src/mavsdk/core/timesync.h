@@ -2,6 +2,7 @@
 
 #include "mavsdk_time.h"
 #include "mavlink_include.h"
+#include <mutex>
 
 namespace mavsdk {
 
@@ -17,6 +18,11 @@ public:
 
     bool is_converged() {
         return _sequence >= CONVERGENCE_WINDOW;
+    }
+
+    int64_t get_timesync_offset_ns() {
+        std::lock_guard<std::mutex> lock(_mutex_time_offset);
+        return _time_offset;
     }
 
     Timesync(const Timesync&) = delete;
@@ -62,6 +68,7 @@ private:
     // bool _autopilot_timesync_acquired{false};
     uint64_t _sequence{};
 
+    std::mutex _mutex_time_offset;
     double _time_offset{};
     double _time_skew{};
 

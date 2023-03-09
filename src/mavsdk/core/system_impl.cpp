@@ -161,6 +161,11 @@ void SystemImpl::enable_timesync()
     _timesync.enable();
 }
 
+int64_t SystemImpl::get_timesync_offset_ns()
+{
+    return _timesync.get_timesync_offset_ns();
+}
+
 System::IsConnectedHandle
 SystemImpl::subscribe_is_connected(const System::IsConnectedCallback& callback)
 {

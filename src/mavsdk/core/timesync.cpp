@@ -169,6 +169,7 @@ void Timesync::add_sample(int64_t offset_ns)
 	// Online exponential smoothing filter. The derivative of the estimate is also
 	// estimated in order to produce an estimate without steady state lag:
 	// https://en.wikipedia.org/wiki/Exponential_smoothing#Double_exponential_smoothing
+    std::lock_guard<std::mutex> lock(_mutex_time_offset);
 	double time_offset_prev = _time_offset;
 
 	if (_sequence == 0) {
@@ -186,6 +187,7 @@ void Timesync::add_sample(int64_t offset_ns)
 
 void Timesync::reset_filter()
 {
+    std::lock_guard<std::mutex> lock(_mutex_time_offset);
     _sequence = 0;
 	_time_offset = 0.0;
 	_time_skew = 0.0;
