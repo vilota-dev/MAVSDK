@@ -47,6 +47,8 @@ public:
 
     void enable_timesync();
 
+    int64_t get_timesync_offset_ns();
+
     System::IsConnectedHandle subscribe_is_connected(const System::IsConnectedCallback& callback);
     void unsubscribe_is_connected(System::IsConnectedHandle handle);
 
@@ -271,7 +273,7 @@ public:
     bool is_connected() const;
 
     Time& get_time();
-    AutopilotTime& get_autopilot_time() { return _autopilot_time; };
+    // AutopilotTime& get_autopilot_time() { return _autopilot_time; };
 
     double get_ping_time_s() const { return _ping.last_ping_time_s(); }
 
@@ -345,7 +347,7 @@ private:
 
     MavlinkAddress _target_address{};
 
-    AutopilotTime _autopilot_time{};
+    // AutopilotTime _autopilot_time{};
 
     MavlinkMessageHandler _mavlink_message_handler{};
 

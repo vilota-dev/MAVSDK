@@ -129,6 +129,8 @@ public:
      */
     enum class ComponentType { UNKNOWN, AUTOPILOT, CAMERA, GIMBAL };
 
+    int64_t get_timesync_offset_ns();
+
     /**
      * @brief type for component discovery callback
      */
