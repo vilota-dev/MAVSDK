@@ -90,6 +90,7 @@ void Timesync::send_timesync(uint64_t tc1, uint64_t ts1)
 
 void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_local_time_ns)
 {
+    std::lock_guard<std::mutex> lock(_mutex_time_offset);
     // uint64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
     //                       _parent.get_autopilot_time().now().time_since_epoch())
     //                       .count();
@@ -115,9 +116,12 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
 
             _high_deviation_count++;
 
+            // debugging
+            LogWarn() << "deviation detected: " << deviation_ns / 1e6 << " ms";
+
             if (_high_deviation_count > MAX_CONSECUTIVE_HIGH_DEVIATION) {
                 // Issue a warning to the user if the RTT is constantly high
-                LogWarn() << "Time jump detected. Resetting time sync";
+                LogWarn() << "Time jump detected. Resetting time sync: deviation = " << deviation_ns / 1e6  << " ms";
                 
                 reset_filter();
                 // Reset counter
@@ -145,9 +149,11 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
 
             if (!is_converged() && _sequence % 50 == 1)
                 LogInfo() << "Time Sync in progress " << _sequence << "/" << CONVERGENCE_WINDOW 
-                    << ", current offset estimate = " << _time_offset / 1e6 << " ms, current offset sample = " << offset_ns / 1e6 << " ms";
+                    << ", current offset estimate = " << _time_offset / 1e6 << " ms, " 
+                    << "skew = " << _time_skew << ", current offset sample = " << offset_ns / 1e6 << " ms";
             else if (_sequence == CONVERGENCE_WINDOW)
-                LogInfo() << "Time Sync complete with offset of " << _time_offset / 1e6 << " ms, last offset sample = "
+                LogInfo() << "Time Sync complete with offset of " << _time_offset / 1e6 << " ms, " 
+                    << "skew = " << _time_skew << ", last offset sample = "
                     << offset_ns / 1e6 << " ms";
 
             // Reset high RTT count after filter update
@@ -181,7 +187,6 @@ void Timesync::add_sample(int64_t offset_ns)
 	// Online exponential smoothing filter. The derivative of the estimate is also
 	// estimated in order to produce an estimate without steady state lag:
 	// https://en.wikipedia.org/wiki/Exponential_smoothing#Double_exponential_smoothing
-    std::lock_guard<std::mutex> lock(_mutex_time_offset);
 	double time_offset_prev = _time_offset;
 
 	if (_sequence == 0) {
@@ -199,7 +204,6 @@ void Timesync::add_sample(int64_t offset_ns)
 
 void Timesync::reset_filter()
 {
-    std::lock_guard<std::mutex> lock(_mutex_time_offset);
     _sequence = 0;
 	_time_offset = 0.0;
 	_time_skew = 0.0;
