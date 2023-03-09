@@ -133,8 +133,11 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
             // Increment sequence counter after filter update
             _sequence++;
 
-            if (_sequence == CONVERGENCE_WINDOW)
-                LogInfo() << "Time Sync complete with offset of " << _time_offset / 1e6 << " ms";
+            if (_sequence == 1)
+                LogInfo() << "Time Sync starts, first offset sample = " << offset_ns / 1e6 << " ms";
+            else if (_sequence == CONVERGENCE_WINDOW)
+                LogInfo() << "Time Sync complete with offset of " << _time_offset / 1e6 << " ms, last offset sample = "
+                    << offset_ns / 1e6 << " ms";
 
             // Reset high RTT count after filter update
             _high_deviation_count = 0;
