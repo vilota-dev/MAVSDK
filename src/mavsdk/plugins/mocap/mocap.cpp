@@ -199,20 +199,20 @@ operator<<(std::ostream& str, Mocap::AttitudePositionMocap const& attitude_posit
     return str;
 }
 
-std::ostream& operator<<(std::ostream& str, Mocap::Odometry::MavFrame const& mav_frame)
+std::ostream& operator<<(std::ostream& str, Mocap::Odometry::MavEstimator const& mav_estimator)
 {
-    switch (mav_frame) {
-        case Mocap::Odometry::MavFrame::MocapNed:
-            return str << "Mocap Ned";
-        case Mocap::Odometry::MavFrame::LocalFrd:
-            return str << "Local Frd";
+    switch (mav_estimator) {
+        case Mocap::Odometry::MavEstimator::Mocap:
+            return str << "Mocap";
+        case Mocap::Odometry::MavEstimator::Vision:
+            return str << "Vision";
         default:
             return str << "Unknown";
     }
 }
 bool operator==(const Mocap::Odometry& lhs, const Mocap::Odometry& rhs)
 {
-    return (rhs.time_usec == lhs.time_usec) && (rhs.frame_id == lhs.frame_id) &&
+    return (rhs.time_usec == lhs.time_usec) && (rhs.mav_estimator == lhs.mav_estimator) &&
            (rhs.position_body == lhs.position_body) && (rhs.q == lhs.q) &&
            (rhs.speed_body == lhs.speed_body) &&
            (rhs.angular_velocity_body == lhs.angular_velocity_body) &&
@@ -225,7 +225,7 @@ std::ostream& operator<<(std::ostream& str, Mocap::Odometry const& odometry)
     str << std::setprecision(15);
     str << "odometry:" << '\n' << "{\n";
     str << "    time_usec: " << odometry.time_usec << '\n';
-    str << "    frame_id: " << odometry.frame_id << '\n';
+    str << "    mav_estimator: " << odometry.mav_estimator << '\n';
     str << "    position_body: " << odometry.position_body << '\n';
     str << "    q: " << odometry.q << '\n';
     str << "    speed_body: " << odometry.speed_body << '\n';

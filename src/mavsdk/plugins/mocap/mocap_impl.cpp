@@ -213,13 +213,19 @@ Mocap::Result MocapImpl::send_odometry(const Mocap::Odometry& odometry)
     } else {
         return Mocap::Result::InvalidRequestData;
     }
+    
+    uint8_t mav_estimator_type;
+    if (odometry.mav_estimator == Mocap::Odometry::MavEstimator::Mocap)
+        mav_estimator_type = MAV_ESTIMATOR_TYPE_MOCAP;
+    else if (odometry.mav_estimator == Mocap::Odometry::MavEstimator::Vision)
+        mav_estimator_type = MAV_ESTIMATOR_TYPE_VISION;
 
     mavlink_msg_odometry_pack(
         _parent->get_own_system_id(),
         _parent->get_own_component_id(),
         &message,
         odometry.time_usec,
-        static_cast<uint8_t>(odometry.frame_id),
+        static_cast<uint8_t>(MAV_FRAME_LOCAL_FRD),
         static_cast<uint8_t>(MAV_FRAME_BODY_FRD),
         odometry.position_body.x_m,
         odometry.position_body.y_m,
@@ -233,9 +239,9 @@ Mocap::Result MocapImpl::send_odometry(const Mocap::Odometry& odometry)
         odometry.angular_velocity_body.yaw_rad_s,
         pose_covariance.data(),
         velocity_covariance.data(),
-        0,
-        MAV_ESTIMATOR_TYPE_MOCAP,
-        0);
+        0, // reset counter
+        mav_estimator_type,
+        0); // optional field, 0 = unknown/unset quality
 
     return _parent->send_message(message) ? Mocap::Result::Success : Mocap::Result::ConnectionError;
 }
