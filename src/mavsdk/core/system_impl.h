@@ -50,6 +50,8 @@ public:
 
     int64_t get_timesync_offset_ns();
 
+    bool is_timesync_converged();
+
     System::IsConnectedHandle subscribe_is_connected(const System::IsConnectedCallback& callback);
     void unsubscribe_is_connected(System::IsConnectedHandle handle);
 
