@@ -132,6 +132,8 @@ public:
 
     int64_t get_timesync_offset_ns();
 
+    bool is_timesync_converged();
+
     /**
      * @brief type for component discovery callback
      */

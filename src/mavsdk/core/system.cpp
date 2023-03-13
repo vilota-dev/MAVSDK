@@ -97,4 +97,9 @@ int64_t System::get_timesync_offset_ns()
     return _system_impl->get_timesync_offset_ns();
 }
 
+bool System::is_timesync_converged()
+{
+    return _system_impl->is_timesync_converged();
+}
+
 } // namespace mavsdk
