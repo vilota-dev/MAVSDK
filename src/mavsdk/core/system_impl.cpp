@@ -144,6 +144,11 @@ int64_t SystemImpl::get_timesync_offset_ns()
     return _timesync.get_timesync_offset_ns();
 }
 
+bool SystemImpl::is_timesync_converged()
+{
+    return _timesync.is_converged();
+}
+
 System::IsConnectedHandle
 SystemImpl::subscribe_is_connected(const System::IsConnectedCallback& callback)
 {
