@@ -10,6 +10,10 @@
 #include <utility>
 #endif
 
+#if defined(LINUX)
+#include <linux/serial.h>
+#include <sys/ioctl.h>
+#endif
 namespace mavsdk {
 
 #ifndef WINDOWS
@@ -122,6 +126,19 @@ ConnectionResult SerialConnection::setup_port()
         close(_fd);
         return ConnectionResult::ConnectionError;
     }
+
+
+    // Enable low latency mode on Linux
+    {
+
+        struct serial_struct ser_info;
+        ioctl(_fd, TIOCGSERIAL, &ser_info);
+
+        ser_info.flags |= ASYNC_LOW_LATENCY;
+
+        ioctl(_fd, TIOCSSERIAL, &ser_info);
+    }
+
 #endif
 
 #if defined(LINUX) || defined(APPLE)
@@ -135,8 +152,15 @@ ConnectionResult SerialConnection::setup_port()
     tc.c_cc[VTIME] = 10; // Timeout after 1 second.
 
     if (_flow_control) {
+        tc.c_iflag &= ~(IXOFF | IXON);
         tc.c_cflag |= CRTSCTS;
+    }else{
+        tc.c_iflag &= ~(IXOFF | IXON);
+        tc.c_cflag &= ~CRTSCTS;
     }
+
+    // Set serial port to "raw" mode to prevent EOF exit.
+    cfmakeraw(&tc);
 #endif
 
 #if defined(LINUX) || defined(APPLE)
