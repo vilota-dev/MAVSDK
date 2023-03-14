@@ -141,6 +141,8 @@ ConnectionResult SerialConnection::setup_port()
 
 #endif
 
+// https://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html
+
 #if defined(LINUX) || defined(APPLE)
     tc.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
     tc.c_oflag &= ~(OCRNL | ONLCR | ONLRET | ONOCR | OFILL | OPOST);
@@ -164,7 +166,7 @@ ConnectionResult SerialConnection::setup_port()
 #endif
 
 #if defined(LINUX) || defined(APPLE)
-    tc.c_cflag |= CLOCAL; // Without this a write() blocks indefinitely.
+    tc.c_cflag |= (CLOCAL | CREAD); // Without this a write() blocks indefinitely.
 
 #if defined(LINUX)
     const int baudrate_or_define = define_from_baudrate(_baudrate);
