@@ -211,9 +211,19 @@ void SystemImpl::process_heartbeat(const mavlink_message_t& message)
     mavlink_msg_heartbeat_decode(&message, &heartbeat);
 
     if (heartbeat.autopilot == MAV_AUTOPILOT_PX4) {
-        _autopilot = Autopilot::Px4;
+        if (_autopilot == Autopilot::Unknown) {
+            LogInfo() << "PX4 Autopilot detected";
+            _autopilot = Autopilot::Px4;
+        }else if (_autopilot != Autopilot::Px4)
+            LogErr() << "Autopilot changes type! Should be PX4";
+        
+        
     } else if (heartbeat.autopilot == MAV_AUTOPILOT_ARDUPILOTMEGA) {
-        _autopilot = Autopilot::ArduPilot;
+        if (_autopilot == Autopilot::Unknown) {
+            LogInfo() << "ArduPilot Autopilot detected";
+            _autopilot = Autopilot::ArduPilot;
+        }else if (_autopilot != Autopilot::ArduPilot)
+            LogErr() << "Autopilot changes type! Should be ArduPilot";
     }
 
     // Only set the vehicle type if the heartbeat is from an autopilot component
