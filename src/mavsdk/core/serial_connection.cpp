@@ -117,6 +117,8 @@ ConnectionResult SerialConnection::setup_port()
     }
 #endif
 
+    LogInfo() << "fd open for " << _serial_node.c_str();
+
 #if defined(LINUX) || defined(APPLE)
     struct termios tc, tc_read;
     bzero(&tc, sizeof(tc));
@@ -135,17 +137,6 @@ ConnectionResult SerialConnection::setup_port()
             tc = tc_read;
     }else
         tc = tc_read;
-
-    // Enable low latency mode on Linux
-    {
-
-        struct serial_struct ser_info;
-        ioctl(_fd, TIOCGSERIAL, &ser_info);
-
-        ser_info.flags |= ASYNC_LOW_LATENCY;
-
-        ioctl(_fd, TIOCSSERIAL, &ser_info);
-    }
 
 #endif
 
@@ -176,7 +167,7 @@ ConnectionResult SerialConnection::setup_port()
 #endif
 
 #if defined(LINUX) || defined(APPLE)
-    tc.c_cflag |= (CLOCAL | CREAD); // Without this a write() blocks indefinitely.
+    // tc.c_cflag |= (CLOCAL | CREAD); // Without this a write() blocks indefinitely.
 
 #if defined(LINUX)
     const int baudrate_or_define = define_from_baudrate(_baudrate);
@@ -205,6 +196,18 @@ ConnectionResult SerialConnection::setup_port()
         close(_fd);
         return ConnectionResult::ConnectionError;
     }
+
+    // Enable low latency mode on Linux
+    {
+
+        struct serial_struct ser_info;
+        ioctl(_fd, TIOCGSERIAL, &ser_info);
+
+        ser_info.flags |= ASYNC_LOW_LATENCY;
+
+        ioctl(_fd, TIOCSSERIAL, &ser_info);
+    }
+
 #endif
 
 #if defined(WINDOWS)
