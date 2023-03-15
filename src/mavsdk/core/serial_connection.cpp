@@ -118,21 +118,23 @@ ConnectionResult SerialConnection::setup_port()
 #endif
 
 #if defined(LINUX) || defined(APPLE)
-    struct termios tc;
+    struct termios tc, tc_read;
     bzero(&tc, sizeof(tc));
 
-    if (const char* env_p = std::getenv("MAVSDK_SERIAL_REUSE_ATTRIBUTE")) {
-        if (std::string(env_p) == "1") {
-            LogDebug() << "tcgetattr is called for setting up termios";
-            
-            if (tcgetattr(_fd, &tc) != 0) {
-                LogErr() << "tcgetattr failed: " << GET_ERROR();
-                close(_fd);
-                return ConnectionResult::ConnectionError;
-            }
-        }
+
+    if (tcgetattr(_fd, &tc_read) != 0) {
+        LogErr() << "tcgetattr failed: " << GET_ERROR();
+        close(_fd);
+        return ConnectionResult::ConnectionError;
     }
 
+    if (const char* env_p = std::getenv("MAVSDK_SERIAL_NO_READ_ATTRIBUTE")) {
+        if (std::string(env_p) == "1") {
+            LogDebug() << "tcgetattr is skipped for termios";
+        }else
+            tc = tc_read;
+    }else
+        tc = tc_read;
 
     // Enable low latency mode on Linux
     {
@@ -153,7 +155,6 @@ ConnectionResult SerialConnection::setup_port()
     tc.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
     tc.c_iflag |= IGNPAR; // added to fix strange issue of working only after mavros launched once
     tc.c_oflag &= ~(OCRNL | ONLCR | ONLRET | ONOCR | OFILL | OPOST);
-    tc.c_oflag |= ONLCR | OPOST;
     tc.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG | TOSTOP);
     tc.c_lflag |= ECHOCTL | ECHOE | ECHOK | ECHOKE;
     tc.c_cflag &= ~(CSIZE | PARENB | CRTSCTS);
