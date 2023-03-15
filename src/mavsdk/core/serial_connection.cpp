@@ -87,17 +87,17 @@ ConnectionResult SerialConnection::setup_port()
 {
 #if defined(LINUX) || defined(APPLE)
     // open() hangs on macOS or Linux devices(e.g. pocket beagle) unless you give it O_NONBLOCK
-    _fd = open(_serial_node.c_str(), O_RDWR | O_NOCTTY | O_NONBLOCK);
+    _fd = open(_serial_node.c_str(), O_RDWR | O_NOCTTY);
     if (_fd == -1) {
         LogErr() << "open failed: " << GET_ERROR();
         return ConnectionResult::ConnectionError;
     }
     // We need to clear the O_NONBLOCK again because we can block while reading
     // as we do it in a separate thread.
-    if (fcntl(_fd, F_SETFL, 0) == -1) {
-        LogErr() << "fcntl failed: " << GET_ERROR();
-        return ConnectionResult::ConnectionError;
-    }
+    // if (fcntl(_fd, F_SETFL, 0) == -1) {
+    //     LogErr() << "fcntl failed: " << GET_ERROR();
+    //     return ConnectionResult::ConnectionError;
+    // }
 #elif defined(WINDOWS)
     // Required for COM ports > 9.
     const auto full_serial_path = "\\\\.\\" + _serial_node;
@@ -178,6 +178,8 @@ ConnectionResult SerialConnection::setup_port()
     if (baudrate_or_define == -1) {
         return ConnectionResult::BaudrateUnknown;
     }
+
+    tcflush(_fd, TCIFLUSH);
 
     if (cfsetispeed(&tc, baudrate_or_define) != 0) {
         LogErr() << "cfsetispeed failed: " << GET_ERROR();
