@@ -179,7 +179,6 @@ ConnectionResult SerialConnection::setup_port()
         return ConnectionResult::BaudrateUnknown;
     }
 
-    tcflush(_fd, TCIFLUSH);
 
     if (cfsetispeed(&tc, baudrate_or_define) != 0) {
         LogErr() << "cfsetispeed failed: " << GET_ERROR();
@@ -209,6 +208,8 @@ ConnectionResult SerialConnection::setup_port()
 
         ioctl(_fd, TIOCSSERIAL, &ser_info);
     }
+
+    tcflush(_fd, TCIFLUSH);
 
 #endif
 
@@ -354,6 +355,13 @@ void SerialConnection::receive()
             continue;
         }
 #endif
+
+        if (const char* env_p = std::getenv("MAVSDK_SERIAL_RECV_LEN")) {
+            if (std::string(env_p) == "1") {
+                LogDebug() << "recv_len = " << recv_len;
+            }
+        }
+        
         if (recv_len > static_cast<int>(sizeof(buffer)) || recv_len == 0) {
             continue;
         }
