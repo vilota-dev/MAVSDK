@@ -153,9 +153,11 @@ ConnectionResult SerialConnection::setup_port()
     tc.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
     tc.c_iflag |= IGNPAR; // added to fix strange issue of working only after mavros launched once
     tc.c_oflag &= ~(OCRNL | ONLCR | ONLRET | ONOCR | OFILL | OPOST);
+    tc.c_oflag |= ONLCR | OPOST;
     tc.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG | TOSTOP);
+    tc.c_lflag |= ECHOCTL | ECHOE | ECHOK | ECHOKE;
     tc.c_cflag &= ~(CSIZE | PARENB | CRTSCTS);
-    tc.c_cflag |= CS8;
+    tc.c_cflag |= CS8 | CLOCAL | CREAD | HUPCL;
 
     tc.c_cc[VMIN] = 0; // We are ok with 0 bytes.
     tc.c_cc[VTIME] = 10; // Timeout after 1 second.
