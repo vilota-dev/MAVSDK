@@ -208,6 +208,8 @@ ConnectionResult SerialConnection::setup_port()
         ioctl(_fd, TIOCSSERIAL, &ser_info);
     }
 
+    tcflush(_fd, TCIFLUSH);
+
 #endif
 
 #if defined(WINDOWS)
@@ -352,6 +354,13 @@ void SerialConnection::receive()
             continue;
         }
 #endif
+
+        if (const char* env_p = std::getenv("MAVSDK_SERIAL_RECV_LEN")) {
+            if (std::string(env_p) == "1") {
+                LogDebug() << "recv_len = " << recv_len;
+            }
+        }
+        
         if (recv_len > static_cast<int>(sizeof(buffer)) || recv_len == 0) {
             continue;
         }
