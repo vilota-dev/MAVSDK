@@ -121,10 +121,16 @@ ConnectionResult SerialConnection::setup_port()
     struct termios tc;
     bzero(&tc, sizeof(tc));
 
-    if (tcgetattr(_fd, &tc) != 0) {
-        LogErr() << "tcgetattr failed: " << GET_ERROR();
-        close(_fd);
-        return ConnectionResult::ConnectionError;
+    if (const char* env_p = std::getenv("MAVSDK_SERIAL_REUSE_ATTRIBUTE")) {
+        if (std::string(env_p) == "1") {
+            LogDebug() << "tcgetattr is called for setting up termios";
+            
+            if (tcgetattr(_fd, &tc) != 0) {
+                LogErr() << "tcgetattr failed: " << GET_ERROR();
+                close(_fd);
+                return ConnectionResult::ConnectionError;
+            }
+        }
     }
 
 
@@ -145,6 +151,7 @@ ConnectionResult SerialConnection::setup_port()
 
 #if defined(LINUX) || defined(APPLE)
     tc.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
+    tc.c_iflag |= IGNPAR; // added to fix strange issue of working only after mavros launched once
     tc.c_oflag &= ~(OCRNL | ONLCR | ONLRET | ONOCR | OFILL | OPOST);
     tc.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG | TOSTOP);
     tc.c_cflag &= ~(CSIZE | PARENB | CRTSCTS);
