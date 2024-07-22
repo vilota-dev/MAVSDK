@@ -32,7 +32,7 @@ void Timesync::do_work()
     if (_system_impl.get_time().elapsed_since_s(_last_time) >= TIMESYNC_SEND_INTERVAL_S) {
         if (_system_impl.is_connected()) {
             // uint64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-            //                       _parent.get_autopilot_time().now().time_since_epoch())
+            //                       _system_impl.get_autopilot_time().now().time_since_epoch())
             //                       .count();
 
             // we initiate timesync using monotonic clock
@@ -58,7 +58,7 @@ void Timesync::process_timesync(const mavlink_message_t& message)
     //                      .count();
 
     // we send monotonic clock back to FC
-    int64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(_parent.get_time().steady_time()
+    int64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(_system_impl.get_time().steady_time()
                 .time_since_epoch()).count();
 
     if (timesync.tc1 == 0) {
@@ -92,7 +92,7 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
 {
     std::lock_guard<std::mutex> lock(_mutex_time_offset);
     // uint64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
-    //                       _parent.get_autopilot_time().now().time_since_epoch())
+    //                       _system_impl.get_autopilot_time().now().time_since_epoch())
     //                       .count();
     uint64_t now_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
                           _system_impl.get_time().steady_time().time_since_epoch())
@@ -164,7 +164,7 @@ void Timesync::set_timesync_offset(int64_t offset_ns, uint64_t start_transfer_lo
         }
 
         // Save time offset for other components to use
-        // _parent.get_autopilot_time().shift_time_by(std::chrono::nanoseconds(offset_ns));
+        // _system_impl.get_autopilot_time().shift_time_by(std::chrono::nanoseconds(offset_ns));
         // _autopilot_timesync_acquired = true;
         
     } else {
