@@ -65,10 +65,10 @@ Mocap::Result MocapImpl::send_vision_position_estimate(
     // const uint64_t autopilot_time_usec =
     //     (!vision_position_estimate.time_usec) ?
     //         std::chrono::duration_cast<std::chrono::microseconds>(
-    //             _parent->get_autopilot_time().now().time_since_epoch())
+    //             _system_impl->get_autopilot_time().now().time_since_epoch())
     //             .count() :
     //         std::chrono::duration_cast<std::chrono::microseconds>(
-    //             _parent->get_autopilot_time()
+    //             _system_impl->get_autopilot_time()
     //                 .time_in(SystemTimePoint(
     //                     std::chrono::microseconds(vision_position_estimate.time_usec)))
     //                 .time_since_epoch())
@@ -219,6 +219,7 @@ Mocap::Result MocapImpl::send_odometry(const Mocap::Odometry& odometry)
     else if (odometry.mav_estimator == Mocap::Odometry::MavEstimator::Vision)
         mav_estimator_type = MAV_ESTIMATOR_TYPE_VISION;
 
+    mavlink_message_t message;
     mavlink_msg_odometry_pack(
         _system_impl->get_own_system_id(),
         _system_impl->get_own_component_id(),
