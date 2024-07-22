@@ -281,20 +281,20 @@ public:
     }
 
     static rpc::mocap::Odometry::MavFrame
-    translateToRpcMavFrame(const mavsdk::Mocap::Odometry::MavFrame& mav_frame)
+    translateToRpcMavFrame(const mavsdk::Mocap::Odometry::MavEstimator& mav_frame)
     {
         switch (mav_frame) {
             default:
                 LogErr() << "Unknown mav_frame enum value: " << static_cast<int>(mav_frame);
             // FALLTHROUGH
-            case mavsdk::Mocap::Odometry::MavFrame::MocapNed:
+            case mavsdk::Mocap::Odometry::MavEstimator::Mocap:
                 return rpc::mocap::Odometry_MavFrame_MAV_FRAME_MOCAP_NED;
-            case mavsdk::Mocap::Odometry::MavFrame::LocalFrd:
+            case mavsdk::Mocap::Odometry::MavEstimator::Vision:
                 return rpc::mocap::Odometry_MavFrame_MAV_FRAME_LOCAL_FRD;
         }
     }
 
-    static mavsdk::Mocap::Odometry::MavFrame
+    static mavsdk::Mocap::Odometry::MavEstimator
     translateFromRpcMavFrame(const rpc::mocap::Odometry::MavFrame mav_frame)
     {
         switch (mav_frame) {
@@ -302,9 +302,9 @@ public:
                 LogErr() << "Unknown mav_frame enum value: " << static_cast<int>(mav_frame);
             // FALLTHROUGH
             case rpc::mocap::Odometry_MavFrame_MAV_FRAME_MOCAP_NED:
-                return mavsdk::Mocap::Odometry::MavFrame::MocapNed;
+                return mavsdk::Mocap::Odometry::MavEstimator::Mocap;
             case rpc::mocap::Odometry_MavFrame_MAV_FRAME_LOCAL_FRD:
-                return mavsdk::Mocap::Odometry::MavFrame::LocalFrd;
+                return mavsdk::Mocap::Odometry::MavEstimator::Vision;
         }
     }
 
@@ -315,7 +315,7 @@ public:
 
         rpc_obj->set_time_usec(odometry.time_usec);
 
-        rpc_obj->set_frame_id(translateToRpcMavFrame(odometry.frame_id));
+        rpc_obj->set_frame_id(translateToRpcMavFrame(odometry.mav_estimator));
 
         rpc_obj->set_allocated_position_body(
             translateToRpcPositionBody(odometry.position_body).release());
@@ -342,7 +342,7 @@ public:
 
         obj.time_usec = odometry.time_usec();
 
-        obj.frame_id = translateFromRpcMavFrame(odometry.frame_id());
+        obj.mav_estimator = translateFromRpcMavFrame(odometry.frame_id());
 
         obj.position_body = translateFromRpcPositionBody(odometry.position_body());
 
