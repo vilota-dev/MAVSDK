@@ -272,10 +272,10 @@ public:
         /**
          * @brief Mavlink frame id
          */
-        enum class MavFrame {
-            MocapNed, /**< @brief MAVLink number: 14. Odometry local coordinate frame of data given
+        enum class MavEstimator {
+            Mocap, /**< @brief MAVLink number: 14. Odometry local coordinate frame of data given
                          by a motion capture system, Z-down (x: north, y: east, z: down).. */
-            LocalFrd, /**< @brief MAVLink number: 20. Forward, Right, Down coordinate frame. This is
+            Vision /**< @brief MAVLink number: 20. Forward, Right, Down coordinate frame. This is
                          a local frame with Z-down and arbitrary F/R alignment (i.e. not aligned
                          with NED/earth frame). Replacement for MAV_FRAME_MOCAP_NED,
                          MAV_FRAME_VISION_NED, MAV_FRAME_ESTIM_NED.. */
@@ -287,10 +287,10 @@ public:
          * @return A reference to the stream.
          */
         friend std::ostream&
-        operator<<(std::ostream& str, Mocap::Odometry::MavFrame const& mav_frame);
+        operator<<(std::ostream& str, Mocap::Odometry::MavEstimator const& mav_estimator);
 
         uint64_t time_usec{}; /**< @brief Timestamp (0 to use Backend timestamp). */
-        MavFrame frame_id{}; /**< @brief Coordinate frame of reference for the pose data. */
+        MavEstimator mav_estimator{}; /**< @brief Coordinate frame of reference for the pose data. */
         PositionBody position_body{}; /**< @brief Body Position. */
         Quaternion
             q{}; /**< @brief Quaternion components, w, x, y, z (1 0 0 0 is the null-rotation). */

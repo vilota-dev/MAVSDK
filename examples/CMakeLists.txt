@@ -3,6 +3,9 @@ project(mavsdk_examples)
 
 # This allows to build all examples at once.
 
+set(cmake_config_DIR "/home/$ENV{USER}/git/MAVSDK/build/install/lib/cmake")
+set(MAVSDK_DIR ${cmake_config_DIR}/MAVSDK)
+
 if (WERROR)
     add_compile_options(-Werror)
 endif()

@@ -92,9 +92,19 @@ void System::enable_timesync()
     _system_impl->enable_timesync();
 }
 
-Autopilot System::autopilot_type() const
+// Autopilot System::autopilot_type() const
+// {
+//     return _system_impl->autopilot();
+// }
+
+int64_t System::get_timesync_offset_ns()
 {
-    return _system_impl->autopilot();
+    return _system_impl->get_timesync_offset_ns();
+}
+
+bool System::is_timesync_converged()
+{
+    return _system_impl->is_timesync_converged();
 }
 
 } // namespace mavsdk

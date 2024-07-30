@@ -48,6 +48,27 @@ HunterGate(
 
 project(mavsdk_superbuild)
 
+# configure build types and build c-flags
+if( NOT CMAKE_BUILD_TYPE )
+  # Release, RelWithAssert
+  set( CMAKE_BUILD_TYPE RelWithAssert) # Choice of Release (ignore assert) and RelWithDebInfo (includes assert)
+endif()
+
+message(WARNING "CMAKE_BUILD_TYPE = ${CMAKE_BUILD_TYPE}")
+
+set(CMAKE_CXX_FLAGS_DEBUG  "-O0 -g")          # cmake default: "-g"
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O3 -g")  # cmake default: "-O2 -g -DNDEBUG"
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -DNDEBUG")   # cmake default: "-O3 -DNDEBUG"
+set(CMAKE_CXX_FLAGS_RELWITHASSERT "-O3")
+
+
+# Set default installation directory
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(CMAKE_INSTALL_PREFIX "${CMAKE_BINARY_DIR}/install" CACHE PATH "Installation Directory" FORCE)
+endif()
+
+message(STATUS "CMAKE_INSTALL_PREFIX = ${CMAKE_INSTALL_PREFIX}")
+
 if (BUILD_BACKEND)
     message(FATAL_ERROR "The argument BUILD_BACKEND has been replaced by BUILD_MAVSDK_SERVER. To build mavsdk_server, use -DBUILD_MAVSDK_SERVER=ON.")
 endif()

@@ -10,6 +10,10 @@
 #include <utility>
 #endif
 
+#if defined(LINUX)
+#include <linux/serial.h>
+#include <sys/ioctl.h>
+#endif
 namespace mavsdk {
 
 #ifndef WINDOWS
@@ -113,34 +117,57 @@ ConnectionResult SerialConnection::setup_port()
     }
 #endif
 
+    LogInfo() << "fd open for " << _serial_node.c_str();
+
 #if defined(LINUX) || defined(APPLE)
-    struct termios tc;
+    struct termios tc, tc_read;
     bzero(&tc, sizeof(tc));
 
-    if (tcgetattr(_fd, &tc) != 0) {
+
+    if (tcgetattr(_fd, &tc_read) != 0) {
         LogErr() << "tcgetattr failed: " << GET_ERROR();
         close(_fd);
         return ConnectionResult::ConnectionError;
     }
+
+    if (const char* env_p = std::getenv("MAVSDK_SERIAL_NO_READ_ATTRIBUTE")) {
+        if (std::string(env_p) == "1") {
+            LogDebug() << "tcgetattr is skipped for termios";
+        }else
+            tc = tc_read;
+    }else
+        tc = tc_read;
+
 #endif
+
+// https://tldp.org/HOWTO/Serial-Programming-HOWTO/x115.html
 
 #if defined(LINUX) || defined(APPLE)
     tc.c_iflag &= ~(IGNBRK | BRKINT | ICRNL | INLCR | PARMRK | INPCK | ISTRIP | IXON);
+    tc.c_iflag |= IGNPAR; // added to fix strange issue of working only after mavros launched once
     tc.c_oflag &= ~(OCRNL | ONLCR | ONLRET | ONOCR | OFILL | OPOST);
     tc.c_lflag &= ~(ECHO | ECHONL | ICANON | IEXTEN | ISIG | TOSTOP);
+    tc.c_lflag |= ECHOCTL | ECHOE | ECHOK | ECHOKE;
     tc.c_cflag &= ~(CSIZE | PARENB | CRTSCTS);
-    tc.c_cflag |= CS8;
+    tc.c_cflag |= CS8 | CLOCAL | CREAD | HUPCL;
 
     tc.c_cc[VMIN] = 0; // We are ok with 0 bytes.
     tc.c_cc[VTIME] = 10; // Timeout after 1 second.
 
     if (_flow_control) {
+        tc.c_iflag &= ~(IXOFF | IXON);
         tc.c_cflag |= CRTSCTS;
+    }else{
+        tc.c_iflag &= ~(IXOFF | IXON);
+        tc.c_cflag &= ~CRTSCTS;
     }
+
+    // Set serial port to "raw" mode to prevent EOF exit.
+    cfmakeraw(&tc);
 #endif
 
 #if defined(LINUX) || defined(APPLE)
-    tc.c_cflag |= CLOCAL; // Without this a write() blocks indefinitely.
+    // tc.c_cflag |= (CLOCAL | CREAD); // Without this a write() blocks indefinitely.
 
 #if defined(LINUX)
     const int baudrate_or_define = define_from_baudrate(_baudrate);
@@ -169,6 +196,20 @@ ConnectionResult SerialConnection::setup_port()
         close(_fd);
         return ConnectionResult::ConnectionError;
     }
+
+    // Enable low latency mode on Linux
+    {
+
+        struct serial_struct ser_info;
+        ioctl(_fd, TIOCGSERIAL, &ser_info);
+
+        ser_info.flags |= ASYNC_LOW_LATENCY;
+
+        ioctl(_fd, TIOCSSERIAL, &ser_info);
+    }
+
+    tcflush(_fd, TCIFLUSH);
+
 #endif
 
 #if defined(WINDOWS)
@@ -313,6 +354,13 @@ void SerialConnection::receive()
             continue;
         }
 #endif
+
+        if (const char* env_p = std::getenv("MAVSDK_SERIAL_RECV_LEN")) {
+            if (std::string(env_p) == "1") {
+                LogDebug() << "recv_len = " << recv_len;
+            }
+        }
+        
         if (recv_len > static_cast<int>(sizeof(buffer)) || recv_len == 0) {
             continue;
         }
